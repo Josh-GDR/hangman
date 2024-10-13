@@ -4,25 +4,28 @@ require 'json'
 class SaveFiles
   @@DefaultPath = './SaveStates/'
   @@serializer = YAML
-  @@Word = :word
-  @@pos = :pos
-
-  def self.pos
-    @@pos
+  
+  def self.serializer=(_serializer)
+    @@serializer = _serializer
   end
 
-  def self.Word
-    @@Word
-  end
-
-  def self.save(_word, _wordPos)
+  def self.save(_word = '', _wordPos = 0, _turn = 0)
     Dir.mkdir(@@DefaultPath) unless Dir.exist?(@@DefaultPath)
+    fileName = "ST#" << Dir.glob("#{@@DefaultPath}/**/*").count.to_s
+    self.writeFile(fileName, _word, _wordPos, _turn)
+  end
 
-    file = File.new("#{@@DefaultPath}#{_word}#{self.extentionChooser}", 'w+')
-    file.puts @@serializer.dump({
+  def self.updateFile(_word, _wordPos, _turn, fileName)
+    Dir.mkdir(@@DefaultPath) unless Dir.exist?(@@DefaultPath)
+    writeFile(fileName.chars.take(fileName.chars.index('.')).join, _word, _wordPos, _turn)    
+  end
+
+  def self.writeFile(fileName, _word, _wordPos, _turn)
+    File.write("#{@@DefaultPath}#{fileName}#{self.extentionChooser}", @@serializer.dump({
       word: _word,
-      pos: _wordPos
-    })
+      pos: _wordPos,
+      turn: _turn
+    }))
   end
 
   def self.load(_word = ' ') 
@@ -33,8 +36,7 @@ class SaveFiles
     end
 
     deserializer = getCorrectDeserializer(_word.chars.drop(_word.chars.index('.')).join)
-    obj = deserializer.load(File.read("#{@@DefaultPath}#{_word}"))
-    return obj
+    deserializer.load(File.read("#{@@DefaultPath}#{_word}"))
   end
 
   def self.extentionChooser
@@ -43,10 +45,6 @@ class SaveFiles
     elsif @@serializer == JSON
       return '.json'
     end    
-  end
-
-  def self.changeSerializer(extention)
-    @@serializer = self.getCorrectDeserializer(extention)
   end
 
   def self.getCorrectDeserializer(extension)
