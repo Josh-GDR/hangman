@@ -21,17 +21,26 @@ class RandomWordChooser
     gameLoop
   end
 
+  def correctFormat(word, serializer)
+    if serializer == YAML
+      return word.to_sym
+    elsif serializer == JSON
+      return word.to_s
+    end
+  end
+
   def loadGame(fileName)
-#    begin
+    begin
+      serializer = SaveFiles.getCorrectDeserializer(fileName.chars.drop(fileName.chars.index('.')).join)
       lastGame = SaveFiles.load(fileName)
-      @incompleteWord = lastGame[:word]
-      @wordPos = lastGame[:pos]
+      @incompleteWord = lastGame[correctFormat('word', serializer)]
+      @wordPos = lastGame[correctFormat('pos', serializer)]
       @selectedWord = @@Dictionary[@wordPos]
       @fileName = fileName
-      gameLoop(lastGame[:turn])   
-#    rescue
-#      puts 'There was an issue loading the save file, make sure you write it well'
-#    end
+      gameLoop(lastGame[correctFormat('turn', serializer)])   
+    rescue
+      puts 'There was an issue loading the save file, make sure you write it well'
+    end
   end
 
   private def chooserWord

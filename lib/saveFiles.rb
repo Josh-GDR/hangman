@@ -12,20 +12,20 @@ class SaveFiles
   def self.save(_word = '', _wordPos = 0, _turn = 0)
     Dir.mkdir(@@DefaultPath) unless Dir.exist?(@@DefaultPath)
     fileName = "ST#" << Dir.glob("#{@@DefaultPath}/**/*").count.to_s
-    self.writeFile(fileName, _word, _wordPos, _turn)
+    File.write("#{@@DefaultPath}#{fileName}#{self.extentionChooser}", @@serializer.dump({
+      :word => _word,
+      :pos => _wordPos,
+      :turn => _turn
+    }))
   end
 
   def self.updateFile(_word, _wordPos, _turn, fileName)
     Dir.mkdir(@@DefaultPath) unless Dir.exist?(@@DefaultPath)
-    writeFile(fileName.chars.take(fileName.chars.index('.')).join, _word, _wordPos, _turn)    
-  end
-
-  def self.writeFile(fileName, _word, _wordPos, _turn)
-    File.write("#{@@DefaultPath}#{fileName}#{self.extentionChooser}", @@serializer.dump({
-      word: _word,
-      pos: _wordPos,
-      turn: _turn
-    }))
+    File.write("#{@@DefaultPath}#{fileName}", @@serializer.dump({
+      :word => _word,
+      :pos => _wordPos,
+      :turn => _turn
+    }))  
   end
 
   def self.load(_word = ' ') 
