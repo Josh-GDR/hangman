@@ -45,6 +45,10 @@ class SaveFiles
     end    
   end
 
+  def self.changeSerializer(extention)
+    @@serializer = self.getCorrectDeserializer(extention)
+  end
+
   def self.getCorrectDeserializer(extension)
     if extension.eql?('.yaml')
       return YAML
